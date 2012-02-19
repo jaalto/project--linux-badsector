@@ -15,8 +15,8 @@ addressing format. This program takes LBA address that smartmaontools
 reports as bad and relocates the sector provided that it is unused.
 
 However, if the sector contains data, there is nothing that can be
-done. This program is no "spinrite" and is not cabable reading damaged
-data.
+done. This program is no "spinrite" and it is not cabable of reading or
+restoring damaged data.
 
 Project homepage (bugs and source) is at
 <http://freecode.com/projects/badsector>
