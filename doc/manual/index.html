@@ -1,0 +1,148 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>badsector - find and relocate unused bad sectors in ext filesystem</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#examples">EXAMPLES</a></li>
+	<li><a href="#environment">ENVIRONMENT</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#standards">STANDARDS</a></li>
+	<li><a href="#availability">AVAILABILITY</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#authors">AUTHORS</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<hr />
+<h1><a name="name">NAME</a></h1>
+<p>badsector - find and relocate unused bad sectors in ext filesystem</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<pre>
+  badsector [options] &lt;harddisk device&gt; &lt;PROBLEM_LBA&gt;</pre>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>Implement the algorithm described in STANDARDS section for the
+ext[2-4] partitions only.</p>
+<p>The <em>smarmontools</em> can report problematic bad sectors in LBA
+addressing format. This program takes LBA address that smartmaontools
+reports as bad and relocates the sector provided that it is unused.</p>
+<p>However, if the sector contains data, there is nothing that can be
+done. This program is no &quot;spinrite&quot; and is not cabable reading damaged
+data.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<dl>
+<dt><strong><a name="a_auto" class="item"><strong>-a, --auto</strong></a></strong></dt>
+
+<dd>
+<p>Use <code>dd(1)</code> to force relocating unused lba error block. Use at your own
+risk.</p>
+</dd>
+<dt><strong><a name="r_read" class="item"><strong>-r, --read</strong></a></strong></dt>
+
+<dd>
+<p>Try reading PROBLEM_LBA with <code>dd(1)</code>. If bad, this might relocate a bad sector
+in modern harddisks.</p>
+</dd>
+<dt><strong><a name="t_test" class="item"><strong>-t, --test</strong></a></strong></dt>
+
+<dd>
+<p>Do not really do actions instructed by option <strong>--auto</strong>, but show
+commands that would be run.</p>
+</dd>
+<dt><strong><a name="h_help" class="item"><strong>-h, --help</strong></a></strong></dt>
+
+<dd>
+<p>Display this help and exit</p>
+</dd>
+<dt><strong><a name="v_version" class="item"><strong>-V, --version</strong></a></strong></dt>
+
+<dd>
+<p>Output version information and exit.</p>
+</dd>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="examples">EXAMPLES</a></h1>
+<p>Run disk test on harddisk and look at the results:</p>
+<pre>
+    smartctl -t short /dev/sda
+    smartctl -l selftest /dev/sda
+    smartctl -l error -q errorsonly /dev/sda
+    smartctl -A /dev/sda</pre>
+<p>After <code>smartctl -t short /dev/sda</code> has finished, pick the LBA value
+from the output. The last test run is always at the top:</p>
+<pre>
+    $ smartctl -l selftest /dev/sda
+    Num  Test_Description  Status        Remaining  LifeTime(hours)  LBA_of_first_error
+    1  Extended offline    read failure  90%        217              0x016561e9</pre>
+<p>Try to relocate this bad sector:</p>
+<pre>
+    badsector --auto [--test] /dev/sda 0x016561e9</pre>
+<p>
+</p>
+<hr />
+<h1><a name="environment">ENVIRONMENT</a></h1>
+<p>None.</p>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p>None.</p>
+<p>
+</p>
+<hr />
+<h1><a name="standards">STANDARDS</a></h1>
+<p>&quot;Bad block HOWTO for smartmontools&quot; by Bruce Allen
+&lt;http://smartmontools.sourceforge.net/BadBlockHowTo.txt&gt;.</p>
+<p>
+</p>
+<hr />
+<h1><a name="availability">AVAILABILITY</a></h1>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p><code>page(1)</code></p>
+<p>
+</p>
+<hr />
+<h1><a name="authors">AUTHORS</a></h1>
+<p>Program was written by Jari Aalto &lt;<a href="mailto:jari.aalto@cante.net">jari.aalto@cante.net</a>&gt;</p>
+<p>Released under license GNU GPL version 2 or (at your option) any later
+version. For more information about license, visit
+&lt;http://www.gnu.org/copyleft/gpl.html&gt;.</p>
+
+</body>
+
+</html>

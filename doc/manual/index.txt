@@ -1,0 +1,76 @@
+NAME
+    badsector - find and relocate unused bad sectors in ext filesystem
+
+SYNOPSIS
+      badsector [options] <harddisk device> <PROBLEM_LBA>
+
+DESCRIPTION
+    Implement the algorithm described in STANDARDS section for the ext[2-4]
+    partitions only.
+
+    The *smarmontools* can report problematic bad sectors in LBA addressing
+    format. This program takes LBA address that smartmaontools reports as
+    bad and relocates the sector provided that it is unused.
+
+    However, if the sector contains data, there is nothing that can be done.
+    This program is no "spinrite" and is not cabable reading damaged data.
+
+OPTIONS
+    -a, --auto
+        Use dd(1) to force relocating unused lba error block. Use at your
+        own risk.
+
+    -r, --read
+        Try reading PROBLEM_LBA with dd(1). If bad, this might relocate a
+        bad sector in modern harddisks.
+
+    -t, --test
+        Do not really do actions instructed by option --auto, but show
+        commands that would be run.
+
+    -h, --help
+        Display this help and exit
+
+    -V, --version
+        Output version information and exit.
+
+EXAMPLES
+    Run disk test on harddisk and look at the results:
+
+        smartctl -t short /dev/sda
+        smartctl -l selftest /dev/sda
+        smartctl -l error -q errorsonly /dev/sda
+        smartctl -A /dev/sda
+
+    After "smartctl -t short /dev/sda" has finished, pick the LBA value from
+    the output. The last test run is always at the top:
+
+        $ smartctl -l selftest /dev/sda
+        Num  Test_Description  Status        Remaining  LifeTime(hours)  LBA_of_first_error
+        1  Extended offline    read failure  90%        217              0x016561e9
+
+    Try to relocate this bad sector:
+
+        badsector --auto [--test] /dev/sda 0x016561e9
+
+ENVIRONMENT
+    None.
+
+FILES
+    None.
+
+STANDARDS
+    "Bad block HOWTO for smartmontools" by Bruce Allen
+    <http://smartmontools.sourceforge.net/BadBlockHowTo.txt>.
+
+AVAILABILITY
+SEE ALSO
+    page(1)
+
+AUTHORS
+    Program was written by Jari Aalto <jari.aalto@cante.net>
+
+    Released under license GNU GPL version 2 or (at your option) any later
+    version. For more information about license, visit
+    <http://www.gnu.org/copyleft/gpl.html>.
+
