@@ -27,6 +27,7 @@ NAME		= badsector
 BIN		= $(NAME).sh
 MANSECT		= 8
 PACKAGE_DOC	= $(PACKAGE)
+PODCENTER	= System Commands
 
 DESTDIR		=
 prefix		= /usr
@@ -144,7 +145,11 @@ ls: dist-ls
 
 bin/$(NAME).$(MANSECT): bin/$(NAME).$(MANSECT).pod
 	cd bin && \
-	make -f ../pod2man.mk PACKAGE=$(NAME) MANSECT=$(MANSECT) makeman
+	make -f ../pod2man.mk \
+		PACKAGE=$(NAME) \
+		MANSECT=$(MANSECT) \
+		PODCENTER="$(PODCENTER)" \
+		makeman
 	@-rm -f *.x~~ pod*.tmp
 
 doc/manual/index.html: bin/$(NAME).$(MANSECT).pod
