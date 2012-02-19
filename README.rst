@@ -11,8 +11,8 @@ Implement the algorithm described in STANDARDS section for the
 ext[2-4] partitions only.
 
 The I<smarmontools> can report problematic bad sectors in LBA
-addressing format. This program takes LBA address that smartmaontools
-reports as bad and relocates the sector provided that it is unused.
+addressing format. This program relocates bad LBA sector provided it
+is unused.
 
 However, if the sector contains data, there is nothing that can be
 done. This program is no "spinrite" and it is not cabable of reading or
