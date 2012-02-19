@@ -61,8 +61,8 @@
 .\}
 .\" ========================================================================
 .\"
-.IX Title "doc/badsector 8"
-.TH doc/badsector 8 "2012-02-19" "doc/badsector" "User Commands"
+.IX Title "bin/badsector 8"
+.TH bin/badsector 8 "2012-02-19" "bin/badsector" "User Commands"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -80,12 +80,12 @@ Implement the algorithm described in \s-1STANDARDS\s0 section for the
 ext[2\-4] partitions only.
 .PP
 The \fIsmarmontools\fR can report problematic bad sectors in \s-1LBA\s0
-addressing format. This program takes \s-1LBA\s0 address that smartmaontools
-reports as bad and relocates the sector provided that it is unused.
+addressing format. This program relocates bad \s-1LBA\s0 sector provided it
+is unused.
 .PP
 However, if the sector contains data, there is nothing that can be
-done. This program is no \*(L"spinrite\*(R" and is not cabable reading damaged
-data.
+done. This program is no \*(L"spinrite\*(R" and it is not cabable of reading
+or restoring damaged data.
 .SH "OPTIONS"
 .IX Header "OPTIONS"
 .IP "\fB\-a, \-\-auto\fR" 4
@@ -143,9 +143,10 @@ None.
 <http://smartmontools.sourceforge.net/BadBlockHowTo.txt>.
 .SH "AVAILABILITY"
 .IX Header "AVAILABILITY"
+http://freecode.com/projects/badsector
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIpage\fR\|(1)
+\&\fIsmartctl\fR\|(1)
 .SH "AUTHORS"
 .IX Header "AUTHORS"
 Program was written by Jari Aalto <jari.aalto@cante.net>

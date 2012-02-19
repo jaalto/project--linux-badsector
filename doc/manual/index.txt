@@ -9,11 +9,11 @@ DESCRIPTION
     partitions only.
 
     The *smarmontools* can report problematic bad sectors in LBA addressing
-    format. This program takes LBA address that smartmaontools reports as
-    bad and relocates the sector provided that it is unused.
+    format. This program relocates bad LBA sector provided it is unused.
 
     However, if the sector contains data, there is nothing that can be done.
-    This program is no "spinrite" and is not cabable reading damaged data.
+    This program is no "spinrite" and it is not cabable of reading or
+    restoring damaged data.
 
 OPTIONS
     -a, --auto
@@ -64,8 +64,10 @@ STANDARDS
     <http://smartmontools.sourceforge.net/BadBlockHowTo.txt>.
 
 AVAILABILITY
+    http://freecode.com/projects/badsector
+
 SEE ALSO
-    page(1)
+    smartctl(1)
 
 AUTHORS
     Program was written by Jari Aalto <jari.aalto@cante.net>

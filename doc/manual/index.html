@@ -51,11 +51,11 @@
 <p>Implement the algorithm described in STANDARDS section for the
 ext[2-4] partitions only.</p>
 <p>The <em>smarmontools</em> can report problematic bad sectors in LBA
-addressing format. This program takes LBA address that smartmaontools
-reports as bad and relocates the sector provided that it is unused.</p>
+addressing format. This program relocates bad LBA sector provided it
+is unused.</p>
 <p>However, if the sector contains data, there is nothing that can be
-done. This program is no &quot;spinrite&quot; and is not cabable reading damaged
-data.</p>
+done. This program is no &quot;spinrite&quot; and it is not cabable of reading
+or restoring damaged data.</p>
 <p>
 </p>
 <hr />
@@ -129,11 +129,12 @@ from the output. The last test run is always at the top:</p>
 </p>
 <hr />
 <h1><a name="availability">AVAILABILITY</a></h1>
+<p><a href="http://freecode.com/projects/badsector">http://freecode.com/projects/badsector</a></p>
 <p>
 </p>
 <hr />
 <h1><a name="see_also">SEE ALSO</a></h1>
-<p><code>page(1)</code></p>
+<p><code>smartctl(1)</code></p>
 <p>
 </p>
 <hr />
