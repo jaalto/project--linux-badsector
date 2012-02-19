@@ -55,24 +55,26 @@ Readsector ()
     local lba=$2
 
     if [[ ! "$dev" == /dev/* ]]; then
-        echo "[ERROR] Synopsis: <DEVICE> PROBLEM_LBA" >&2
-        echo "smartctl -a /dev/sda ; smartctl -l error -q errorsonly" >&2
-        return 1
+        Warn "[ERROR] Synopsis: <DEVICE> PROBLEM_LBA"
+        Die "smartctl -a /dev/sda ; smartctl -l error -q errorsonly"
     fi
 
     if [[ ! "$lba" == *[0-9]* ]]; then
-        echo "[ERROR]" \
+        Die "[ERROR]" \
              "Synopsis: DEVICE <PROBLEM_LBA> (Need integer or hex value)" >&2
-        return 1
     fi
 
     if [ ! "$lba" ] || [[ ! "$lba" == *[0-9]* ]]; then
-        echo "Synopsis: DEV <PROBLE_LBA>"
-        echo "smartctl -a /dev/sda ; smartctl -l error -q errorsonly"
-        return 1
+        Warn "Synopsis: DEV <PROBLE_LBA>"
+        Die "smartctl -a /dev/sda ; smartctl -l error -q errorsonly"
     fi
 
     if [[ "$lba" == 0x* ]] || [[ "$lba" == *[a-fA-F]* ]]; then
+
+	if ! which bc > /dev/null 2>&1 ; then
+            Die  "$PREFIX [ERROR] bc(1) program not in PATH"
+	fi
+
         lba={lba#0x}   # Remove "0x" prefix
         local upperval=$(echo $lba | tr 'abcdef' 'ABCDEF')
         lba=$(echo "ibase=16 ; $upperval" | bc)
@@ -83,7 +85,7 @@ Readsector ()
     while [ $lba -lt $max ]
     do
         echo "LBA $lba"
-        ${test+echo} dd if=$dev of=/dev/null bs=512 count=1 skip=$lba
+        ${test:+echo} dd if=$dev of=/dev/null bs=512 count=1 skip=$lba
         let lba+=1
     done
 }
@@ -173,14 +175,18 @@ running smartctl(1) with options '-t short HARRDISK_DEVICE'"
     fi
 
     if [[ ! "$badsec" == *[0-9]* ]]; then
-        echo "$PREFIX [ERROR]" \
+        Die "$PREFIX [ERROR]" \
              "Synopsis: DEVICE <PROBLEM_LBA> (Need integer or hex value)"
-        return 1
     fi
 
     # Convert hex values to integers
 
     if [[ "$badsec" == 0x* ]] || [[ "$badsec" == *[a-fA-F]* ]]; then
+
+	if ! which bc > /dev/null 2>&1 ; then
+            Die  "$PREFIX [ERROR] bc(1) program not in PATH"
+	fi
+	
         badsec={badsec#0x}   # Remove "0x" prefix
         local upperval=$(echo $badsec | tr 'abcdef' 'ABCDEF')
         badsec=$(echo "ibase=16 ; $upperval" | bc)
@@ -197,7 +203,7 @@ running smartctl(1) with options '-t short HARRDISK_DEVICE'"
         file=/tmp/tmp.$$.fdisk
     fi
 
-    PATH="$path" fdisk -lu $dev > $file || return 1
+    fdisk -lu $dev > $file  || return $?
 
     [ -s $file ] || return 1
 
@@ -332,16 +338,24 @@ Use debugfs to find out the file:
 
     expect "debugfs:"
 
-    #  This may take while
-    set timeout 120
+    #  This may take while. Wait 3 minutes.
+    set timeout 180
     send "icheck $blknumber\\n"
 
-    expect -re "(\\[0-9\\]+)\\[ \\t\\]+(.*\\[^\\r\\n\\])"
+    expect -re "(\\[0-9\\]+)\\[ \\t\\]+(.*\\[^\\r\\n\\])\\|()(.*not found.*)"
     set block \$expect_out(1,string)
     set inode \$expect_out(2,string)
     set inode [string trimleft \$inode]
 
-    if { [string match -nocase "*found*" \$inode] } {
+    # Block   Inode number
+    # 507700  <block not found>
+
+    if { [string match -nocase "not found" \$inode] } {
+            send_user "$PREFIX inode was not correct\\n"
+            send "quit"
+            exit 0    
+    }
+    else if { [string match -nocase "found" \$inode] } {
             send_user "$PREFIX inode at $errfs was not associated to a file\\n"
             send "quit"
             exit 0
@@ -360,7 +374,7 @@ Use debugfs to find out the file:
     exit 1
 EOF
 
-    echo "$PREFIX expect $expect"
+    echo "$PREFIX Wait, this may take a while. Running: expect $expect"
 
     if ! expect $expect ; then
 
