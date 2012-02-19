@@ -414,6 +414,6 @@ the bad block and sync the disk.
     echo "$PREFIX Verify results with smartctl -l selftest $dev"
 }
 
-Badsector
+Badsector "$@"
 
 # End of file
