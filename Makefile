@@ -143,7 +143,8 @@ dist-ls:
 ls: dist-ls
 
 bin/$(NAME).$(MANSECT): bin/$(NAME).$(MANSECT).pod
-	make -f pod2man.mk PACKAGE=bin/$(NAME) MANSECT=$(MANSECT) makeman
+	cd bin && \
+	make -f ../pod2man.mk PACKAGE=$(NAME) MANSECT=$(MANSECT) makeman
 	@-rm -f *.x~~ pod*.tmp
 
 doc/manual/index.html: bin/$(NAME).$(MANSECT).pod
