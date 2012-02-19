@@ -202,10 +202,18 @@ running smartctl(1) with options '-t short HARRDISK_DEVICE'"
     else
         file=/tmp/tmp.$$.fdisk
     fi
-
+set -x
     fdisk -lu $dev > $file  || return $?
 
     [ -s $file ] || return 1
+cat $file
+
+    # Disk /dev/sda: 30.0 GB, 30005821440 bytes
+    # 255 heads, 63 sectors/track, 3648 cylinders, total 58605120 sectors
+    # Units = sectors of 1 * 512 = 512 bytes
+    # Sector size (logical/physical): 512 bytes / 512 bytes
+    # I/O size (minimum/optimal): 512 bytes / 512 bytes
+    # Disk identifier: 0x50ddc271
 
     #    Device Boot    Start       End    Blocks   Id  System
     # /dev/sda1   *        63   4209029   2104483+  83  Linux
@@ -216,29 +224,33 @@ running smartctl(1) with options '-t short HARRDISK_DEVICE'"
     # /dev/sda2  97   3648     28531440     f  W95 Ext'd (LBA)
     # /dev/sda3  6931 121601   921094807+   5  Extended
 
-    local lbainfo=$(awk '
-        /Ext/ {
+    local lbainfo=$(
+        awk '
+	/^[Ss]ector size/ {
+	    gsub(/[Bb]ytes/, "")
+	    size = $(NF)
+	    next
+	}
+
+        $1 !~ /^\/dev/ {
             next
         }
 
-        $1 !~ /\/dev/ {
+        /Extended/ {
             next
         }
 
         {
+	    # Get rid of the boot indicator (*)
+	    gsub(/[*]/, "")
+	    
             dev   = $1
             start = $2
             end   = $3
 
-            if ( index(start, "*") > 0 )
-            {
-                start = $3
-                end   = $4
-            }
-
             if ( sec > start  &&  sec < end )
             {
-                print dev " " sec - start
+                print dev " " sec - start " " size
                 exit
             }
         }
@@ -249,6 +261,15 @@ running smartctl(1) with options '-t short HARRDISK_DEVICE'"
 
     local errdev=$1
     local errlba=$2
+    local secsize=$3
+
+    if [ ! "$errdev" ]; then
+    	Die "$PREFIX [FATAL] Can't pinpoint sector $badsect from 'fdisk -lu' output"
+    fi
+
+    if [ ! "$secsize" ]; then
+    	Die "$PREFIX [FATAL] Can't read sector size from 'fdisk -lu' output"
+    fi
 
     #  mount output: /dev/sda8 on /mnt/local/data type ext3 ...
 
@@ -267,20 +288,24 @@ running smartctl(1) with options '-t short HARRDISK_DEVICE'"
     local blksize
 
     if [[ "$errfstype" == ext* ]]; then
-        blksize=$(tune2fs -l $errdev |
-            awk '/^Block size/  { print $(NF); exit }')
-
+    	#  Block size: 4096
+        blksize=$( tune2fs -l $errdev |
+                   awk '/^Block size/ { print $(NF); exit }' )
+                  
     elif [ ! "$mount" ]; then
-        echo "$PREFIX Can't determine fstype, $errdev is not mounted"
+        Warn "$PREFIX [ERROR] Can't determine fstype, $errdev is not mounted"
         grep -e "$errdev" /etc/fstab /dev/null
         return 1
 
     else
-        echo "$PREFIX Sorry, no support for mount: $mount"
-        return 1
+        Die "$PREFIX Sorry, no support for non-ext[2-4] FS mounted at: $mount"
+    fi
+ 
+    if [ ! "$blksize" ]; then
+	Die "$PREFIX [FATAL] 'tune2fs -l $errdev' did not output 'Block size'"
     fi
 
-    local blknumber=$(( errlba * 512 / blksize ))
+    local blknumber=$(( errlba * secsize / blksize ))
 
     echo "$PREFIX Problem in $errdev => $errfs at blknbr $blknumber"
 
@@ -292,6 +317,8 @@ Use debugfs to find out the file:
    ... see the inode number
    ncheck <inode>
 "
+
+return 777
 
     if ! which expect > /dev/null 2>&1 ||
        ! which debugfs > /dev/null 2>&1
